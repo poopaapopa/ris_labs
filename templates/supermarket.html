@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Супермаркет</title>
+    <link rel="stylesheet" href="/static/css/new.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  </head>
+  <body>
+    <nav class="navbar fixed-top bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="/supermarket/{{ login }}">МойСупермаркет</a>
+        <form class="d-flex" role="search" id="searchProductForm">
+          <input class="form-control me-2" type="search" placeholder="Искать" aria-label="Search" id="prod_name" name="prod_name">
+          <button class="btn btn-outline-primary" type="submit">Искать</button>
+        </form>
+        <div class="d-flex justify-content-between gap-3">
+          <button class="btn btn-outline-primary my-auto" id="cart" style="height: 38px; width: 120px;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16">
+                  <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5M3.102 4l1.313 7h8.17l1.313-7zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4m7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4m-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2m7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+              </svg>
+              Корзина
+          </button>
+          <div class="d-flex flex-column justify-content-between">
+            <a>{{ login }}</a>
+            <a href="/logout">Выйти</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+    <div class="py-5 mt-5" style="width: 80%; margin-left: 10%">
+        <div class="row gy-4" id="productsContainer">
+            {% for product in products %}
+            <div class="col-md-2">
+                <div class="card shadow-sm h-100 rounded-5">
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <img src="/static/products/{{ product['prod_name'] }}.jpg" class="card-img-top rounded-5" alt="{{ product['prod_name'] }}">
+                        <p class="card-title text-primary fw-bold mb-1">{{ product['prod_price'] }}₽</p>
+                        <p class="card-text text-break fw-bold mb-2">{{ product['prod_name'] }}</p>
+                        <p class="text-muted small mb-2">{{ product['prod_measure'] }}</p>
+                        <button class="btn btn-light rounded-pill w-100 add-to-cart"
+                                data-product-id="{{ product['prod_id'] }}"
+                                data-product-name="{{ product['prod_name'] }}"
+                                data-product-price="{{ product['prod_price'] }}"
+                                data-product-measure="{{ product['prod_measure'] }}">
+                            В корзину
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div id="tooltip" class="my_tooltip text-center" style="width: 22rem;">
+        <img src="/static/sad_pack.png" class="my-3" style="width: 100%; max-width: 6rem; height: auto;">
+        <div class="py-1" style="font-family: Arial, sans-serif;">
+            <h5 class="fw-bold mb-1">В вашей корзине</h5>
+            <h5 class="fw-bold mb-4">пока пусто</h5>
+            <p class="text-muted fs-6 mb-1">Тут появятся товары, которые</p>
+            <p class="text-muted fs-6">вы закажете.</p>
+        </div>
+    </div>
+    <script>
+        document.getElementById("searchProductForm").onsubmit = async function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(document.getElementById("searchProductForm"));
+            const login = "{{ login }}";
+
+            const response = await fetch(`/supermarket/${login}`, {
+                method: "POST",
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log(data.products);
+                if (data.products.length) {
+                    const productsContainer = document.getElementById("productsContainer");
+                    productsContainer.innerHTML = "";
+                    data.products.forEach(product => {
+                        const productCard = document.createElement("div");
+                        productCard.classList.add("col-md-3");
+                        productCard.innerHTML = `
+                              <div class="card shadow-sm h-100 d-flex flex-column rounded-5" style="width: 65%">
+                                <div class="position-relative">
+                                    <img src="/static/products/${ product['prod_name'] }.jpg" class="card-img-top" alt="${ product['prod_name'] }">
+                                </div>
+                                <div class="card-body d-flex flex-column justify-content-between">
+                                    <p class="card-title text-primary fw-bold mb-1">${ product['prod_price'] }₽</p>
+                                    <p class="card-text text-break fw-bold mb-2">${ product['prod_name'] }</p>
+                                    <p class="text-muted small mt-auto">${ product['prod_measure'] }</p>
+                                    <button class="btn btn-light rounded-pill w-100 add-to-cart"
+                                            data-product-id="${ product['prod_id'] }"
+                                            data-product-name="${ product['prod_name'] }"
+                                            data-product-price="${ product['prod_price'] }"
+                                            data-product-measure="${ product['prod_measure'] }">
+                                        В корзину
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        productCard.querySelectorAll(".add-to-cart").forEach(button => {
+                            button.addEventListener("click", handleAddToCart);
+                        });
+
+                        productsContainer.appendChild(productCard);
+                    });
+                }
+            }
+        };
+    </script>
+    <script>
+      const cartButton = document.getElementById('cart');
+      const tooltip = document.getElementById('tooltip');
+
+      cartButton.addEventListener('mouseenter', () => {
+        tooltip.style.display = 'block';
+      });
+
+      cartButton.addEventListener('mouseleave', () => {
+        setTimeout(() => {
+          if (!tooltip.matches(':hover')) {
+            tooltip.style.display = 'none';
+          }
+        }, 100);
+      });
+
+      tooltip.addEventListener('mouseenter', () => {
+        tooltip.style.display = 'block';
+      });
+
+      tooltip.addEventListener('mouseleave', () => {
+        tooltip.style.display = 'none';
+      });
+    </script>
+    <script>
+        document.querySelectorAll(".add-to-cart").forEach(button => {
+            button.addEventListener("click", handleAddToCart);
+        });
+
+        async function handleAddToCart() {
+            const productId = this.getAttribute("data-product-id");
+            const productName = this.getAttribute("data-product-name");
+            const productPrice = this.getAttribute("data-product-price");
+            const productMeasure = this.getAttribute("data-product-measure");
+
+            if (!productId || !productName || !productPrice || !productMeasure) {
+                console.error("Missing product data:", { productId, productName, productPrice, productMeasure });
+                return;
+            }
+
+            const quantityControl = document.createElement("div");
+            quantityControl.className = "d-flex align-items-center justify-content-between quantity-control rounded-pill w-100";
+
+            quantityControl.innerHTML = `
+                <button class="btn btn-light rounded-pill decrease-quantity" data-product-id="${productId}">−</button>
+                <span class="quantity-value" data-product-id="${productId}"
+                                data-product-name="${ productName }"
+                                data-product-price="${ productPrice }"
+                                data-product-measure="${ productMeasure }">1</span>
+                <button class="btn btn-light rounded-pill increase-quantity" data-product-id="${productId}">+</button>
+            `;
+
+            this.parentNode.replaceChild(quantityControl, this);
+
+            quantityControl.querySelector(".decrease-quantity").addEventListener("click", () => {
+                updateQuantity(productId, -1, productName, productPrice, productMeasure);
+            });
+
+            quantityControl.querySelector(".increase-quantity").addEventListener("click", () => {
+                updateQuantity(productId, 1, productName, productPrice, productMeasure);
+            });
+
+            console.log("Added to cart:", { productId, productName, productPrice, productMeasure });
+            await updateCart(productId, 1, productName, productPrice, productMeasure);
+        }
+
+        function resetButtons() {
+            const allQuantityControls = document.querySelectorAll(".quantity-control");
+            allQuantityControls.forEach(quantityControl => {
+                console.log(quantityControl)
+                const productId = quantityControl.querySelector(".quantity-value").getAttribute("data-product-id");
+                const productName = quantityControl.querySelector(".quantity-value").getAttribute("data-product-name");
+                const productPrice = quantityControl.querySelector(".quantity-value").getAttribute("data-product-price");
+                const productMeasure = quantityControl.querySelector(".quantity-value").getAttribute("data-product-measure");
+
+                if (!productId || !productName || !productPrice || !productMeasure) {
+                    console.error("Missing product data during reset:", { productId, productName, productPrice, productMeasure });
+                    return;
+                }
+
+                const addToCartButton = document.createElement("button");
+                addToCartButton.className = "btn btn-light w-100 mt-auto rounded-pill add-to-cart";
+                addToCartButton.setAttribute("data-product-id", productId);
+                addToCartButton.setAttribute("data-product-name", productName);
+                addToCartButton.setAttribute("data-product-measure", productMeasure);
+                addToCartButton.setAttribute("data-product-price", productPrice);
+                addToCartButton.textContent = "В корзину";
+
+                quantityControl.parentNode.replaceChild(addToCartButton, quantityControl);
+                addToCartButton.addEventListener("click", handleAddToCart);
+            });
+        }
+
+        async function updateQuantity(productId, change, productName, productPrice, productMeasure) {
+            const quantitySpan = document.querySelector(`.quantity-value[data-product-id="${productId}"]`);
+            let currentQuantity = parseInt(quantitySpan.textContent) + change;
+
+            if (currentQuantity === 0)
+            {
+                const addToCartButton = document.createElement("button");
+                addToCartButton.className = "btn btn-light w-100 mt-auto rounded-pill add-to-cart";
+                addToCartButton.setAttribute("data-product-id", productId);
+                addToCartButton.setAttribute("data-product-name", productName);
+                addToCartButton.setAttribute("data-product-measure", productMeasure);
+                addToCartButton.setAttribute("data-product-price", productPrice);
+                addToCartButton.textContent = "В корзину";
+
+                quantitySpan.parentNode.parentNode.replaceChild(addToCartButton, quantitySpan.parentNode);
+
+                addToCartButton.addEventListener("click", handleAddToCart);
+            }
+            else
+                quantitySpan.textContent = currentQuantity;
+
+            console.log(productId, currentQuantity, productName, productPrice, productMeasure)
+            await updateCart(productId, currentQuantity, productName, productPrice, productMeasure);
+
+            console.log(`Product ID: ${productId}, Quantity: ${currentQuantity}`);
+        }
+
+        async function clearCart() {
+            const productsTable = document.getElementById("tooltip");
+            productsTable.innerHTML = "";
+            const message = document.createElement("div");
+            message.innerHTML = `
+                    <img src="/static/sad_pack.png" class="my-3" style="width: 100%; max-width: 6rem; height: auto;">
+                    <div class="py-1" style="font-family: Arial, sans-serif;">
+                        <h5 class="fw-bold mb-1">В вашей корзине</h5>
+                        <h5 class="fw-bold mb-4">пока пусто</h5>
+                        <p class="text-muted fs-6 mb-1">Тут появятся товары, которые</p>
+                        <p class="text-muted fs-6">вы закажете.</p>
+                    </div>
+                `;
+            productsTable.appendChild(message);
+            const cartButton = document.getElementById('cart');
+            cartButton.classList.add("order-button-container");
+            cartButton.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart me-2" viewBox="0 0 16 16">
+                    <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5M3.102 4l1.313 7h8.17l1.313-7zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4m7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4m-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2m7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+                </svg>
+                Корзина
+            `
+            const login = "{{ login }}";
+            await fetch(`/cart/${login}`, {
+                method: 'GET'
+            });
+        }
+
+        async function updateCart(productId, quantity, productName, productPrice, productMeasure) {
+            const login = "{{ login }}";
+            const response = await fetch(`/cart/${login}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    prod_id: productId,
+                    quantity: quantity,
+                    prod_name: productName,
+                    prod_price: productPrice,
+                    prod_measure: productMeasure
+                })
+            });
+            if (response.ok)
+            {
+                const cartData = await response.json();
+                if (cartData.length) {
+                    const productsTable = document.getElementById("tooltip");
+                    productsTable.innerHTML = "";
+                    const title = document.createElement("div");
+                    title.classList.add("mt-3", "fs-5", "mx-3", "mb-2", "tooltip-header", "list-group-item", "d-flex", "align-items-center", "justify-content-between");
+                    title.innerHTML = `
+                        <h5 class="card-title text-start fw-bold fs-5">Корзина</h5>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-trash" viewBox="0 0 24 24">
+                          <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                          <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                        </svg>
+                    `;
+                    title.querySelector(`.bi`).addEventListener("click", () => {
+                        clearCart();
+                        resetButtons();
+                    });
+                    productsTable.appendChild(title);
+
+                    const productBody = document.createElement("div");
+                    productBody.classList.add("list-group", "cart-content");
+
+                    let totalPrice = 0;
+                    cartData.forEach(product => {
+                        totalPrice += product['prod_price'] * product['quantity'];
+                        const productRow = document.createElement("div");
+                        productRow.classList.add("list-group-item", "d-flex", "align-items-center", "justify-content-between", "border-0");
+                        productRow.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <img src="/static/products/${product['prod_name']}.jpg" alt="${product['prod_name']}" class="table-img-top rounded-4 me-3">
+                            <div class="d-flex flex-column justify-content-between">
+                                <div class="mb-2 text-start">${product['prod_name']}</div>
+                                <div class="d-flex">
+                                    <small class="text-primary fw-bold mb-2">${product['prod_price']}₽</small>
+                                    <small class="mx-1">·</small>
+                                    <small class="text-muted pe-1">${product['prod_measure']}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between cart-quantity-control">
+                            <button class="cart-decrease-quantity" data-product-id="${product['prod_id']}">−</button>
+                            <span class="cart-quantity-value" data-product-id="${product['prod_id']}"
+                                data-product-name="${ product['prod_name'] }"
+                                data-product-price="${ product['prod_price'] }"
+                                data-product-measure="${ product['prod_measure'] }">${product['quantity']}</span>
+                            <button class="cart-increase-quantity" data-product-id="${product['prod_id']}">+</button>
+                        </div>
+                    `;
+                        productRow.querySelector(".cart-decrease-quantity").addEventListener("click", () => {
+                            updateQuantity(product['prod_id'], -1, product['prod_name'], product['prod_price'], product['prod_measure']);
+                        });
+
+                        productRow.querySelector(".cart-increase-quantity").addEventListener("click", () => {
+                            updateQuantity(product['prod_id'], 1, product['prod_name'], product['prod_price'], product['prod_measure']);
+                        });
+                        productBody.appendChild(productRow);
+                    });
+                    productsTable.appendChild(productBody);
+
+                    const orderButton = document.createElement('div');
+                    orderButton.classList.add("m-3")
+                    orderButton.innerHTML = `
+                        <button class="btn btn-primary w-100 d-flex align-items-center justify-content-between p-3 rounded-4" style="border-radius: 10px;" id="order">
+                            <span class="text-start">Оформить заказ</span>
+                            <span class="fw-bold fs-5">${totalPrice} ₽</span>
+                        </button>
+                    `
+                    productsTable.appendChild(orderButton);
+                    document.getElementById("order").addEventListener('click', async function() {
+                        const login = "{{ login }}";
+
+                        const response = await fetch(`/cart/${login}`, {
+                            method: "PUT",
+                        });
+
+                        if (response.ok) {
+                            await clearCart();
+                            resetButtons();
+                            alert("Заказ успешно оформлен!");
+                        }
+                    });
+
+                    const cartButton = document.getElementById('cart');
+                    cartButton.classList.add("order-button-container");
+                    cartButton.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart me-2" viewBox="0 0 16 16">
+                            <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5M3.102 4l1.313 7h8.17l1.313-7zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4m7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4m-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2m7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+                        </svg>
+                        ${totalPrice} ₽
+                    `
+
+                }
+                else { await clearCart(); }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  </body>
+</html>

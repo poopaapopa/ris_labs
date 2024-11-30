@@ -1,0 +1,1 @@
+CALL supermarket_report('$year', '$month');

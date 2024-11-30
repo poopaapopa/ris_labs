@@ -1,0 +1,118 @@
+li {
+    color: deeppink;
+    font-size: 28px;
+}
+body {
+    margin: 0;
+    font-family: "Comic Sans MS";
+}
+.header {
+    display: flex;
+    justify-content: space-between;
+    gap: 3px;
+    align-items: center;
+    padding: 10px;
+    background-color: gray;
+}
+.logo {
+    font-size: 28px;
+    font-weight: 600;
+    color: #99D9EA;
+    -webkit-text-stroke: 1px #F9B9D2;
+}
+.search_button {
+    all: unset;
+    font-weight: 600;
+    font-family: "Courier New";
+    box-sizing: content-box;
+    height: 30px;
+    weigth: 50px;
+    text-align: center;
+    border: 1px solid black;
+    border-radius: 3px;
+    background-color: pink;
+    color: #102451;
+}
+.search_input {
+    box-sizing: content-box;
+    height: 26px;
+    border-radius: 20px;
+}
+.account {
+    display: flex;
+    gap: 10px;
+}
+.account_image {
+    border: 1px solid black;
+    width: 75px;
+    height: 75px;
+}
+.account_content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 5px;
+}
+.conteiner {
+    padding: 10px;
+}
+.heading {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 10px;
+}
+.cards {
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.card {
+    border: 2px solid black;
+    box-sizing: border-box;
+    padding: 10px;
+    display: flex;
+    gap: 10px;
+}
+.card_side{
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    gap: 10px;
+}
+.card_side > img {
+    border: 1px solid black;
+    width: 81px;
+    height: 81px;
+}
+.card_side > input {
+    width: 75px;
+}
+.card_content{
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    gap: 10px;
+}
+.card_title {
+    font-size: 24px;
+}
+.card_text {
+    overflow: hidden;
+	text-overflow: ellipsis;
+	display: -webkit-box;
+	-webkit-line-clamp: 4;
+	-webkit-box-orient: vertical;
+}
+.card_footer {
+    display: flex;
+    gap: 30px;
+}
+.card_smiles {
+    display: flex;
+    gap: 10px;
+}
+.auth_back {
+    background: linear-gradient(70deg, blue, pink);
+}

@@ -1,0 +1,1 @@
+INSERT INTO Sales (sale_date, user_id) VALUES ('$sale_date', '$user_id');
